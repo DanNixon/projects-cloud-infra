@@ -4,5 +4,5 @@ Cloud infrastructure for personal projects.
 
 Currently:
 
-- Spaceapi endpoint for Maker Space
-- MB7PMF remote closedown and monitoring
+- [SpaceAPI](https://spaceapi.io/) [endpoint](https://spaceapi.makerspace.org.uk/) for [Maker Space](https://www.makerspace.org.uk/)
+- [MB7PNE](https://ukrepeater.net/my_repeater.php?id=4868) remote closedown and monitoring
