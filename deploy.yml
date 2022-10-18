@@ -1,0 +1,18 @@
+---
+- name: Deploy
+  hosts: localhost
+
+  tasks:
+    - name: Set secrets
+      ansible.builtin.set_fact:
+        mqtt_secrets: "{{ lookup('community.general.passwordstore', 'ansible_secrets/public_infra/mqtt_passwords returnall=true') | from_yaml }}"
+
+    - name: Ensure deployment
+      kubernetes.core.k8s:
+        definition: "{{ lookup('template', '%s' % item) | from_yaml_all | list }}"
+        state: present
+      loop:
+        - matrix-dapnet-bot.yml
+        - mqtt.yml
+        - spaceapi.yml
+        - mb7pne.yml

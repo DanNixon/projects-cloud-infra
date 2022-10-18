@@ -1,0 +1,89 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mqtt
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-config
+  namespace: mqtt
+data:
+  mosquitto.conf: |
+    per_listener_settings false
+
+    log_dest stdout
+    log_type all
+
+    allow_anonymous false
+    password_file /mosquitto/config/passwd
+
+    persistence false
+
+    listener 1883
+    protocol mqtt
+
+  passwd: |
+    {{ mqtt_secrets.mosquitto_passwd | indent }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+  namespace: mqtt
+  labels:
+    app.kubernetes.io/name: mosquitto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mosquitto
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mosquitto
+    spec:
+      volumes:
+        - name: mosquitto-config
+          configMap:
+            name: mosquitto-config
+      containers:
+        - name: mosquitto
+          image: eclipse-mosquitto:2.0
+          volumeMounts:
+            - mountPath: "/mosquitto/config"
+              name: mosquitto-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt
+  namespace: mqtt
+spec:
+  selector:
+    app.kubernetes.io/name: mosquitto
+  ports:
+    - name: mqtt
+      protocol: TCP
+      port: 1883
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: mqtt
+  namespace: mqtt
+spec:
+  entryPoints:
+    - mqtt
+  routes:
+    - kind: Rule
+      match: HostSNI(`*`)
+      services:
+        - Kind: Service
+          name: mqtt
+          port: 1883

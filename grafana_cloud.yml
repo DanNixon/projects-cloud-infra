@@ -1,0 +1,21 @@
+---
+- name: Grafana Cloud
+  hosts: localhost
+
+  pre_tasks:
+    - name: Set secrets
+      ansible.builtin.set_fact:
+        grafana_agent_secrets: "{{ lookup('community.general.passwordstore', 'ansible_secrets/grafana_cloud/personal-projects-prod-1 returnall=true') | from_yaml }}"  # noqa: yaml
+
+  vars:
+    grafana_agent_metrics_enable: true
+    grafana_agent_logs_enable: true
+
+  roles:
+    - dannixon.k8s.grafana_agent
+
+  tasks:
+    - name: Ensure config is present
+      kubernetes.core.k8s:
+        definition: "{{ lookup('template', 'grafana_agent_config.yml') | from_yaml_all | list }}"
+        state: present
