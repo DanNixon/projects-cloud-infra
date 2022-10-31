@@ -1,0 +1,80 @@
+---
+- name: Cloud monitoring configuration
+  hosts: localhost
+
+  tasks:
+    - name: Set secrets
+      ansible.builtin.set_fact:
+        grafana_agent_secrets: "{{ lookup('community.general.passwordstore', 'ansible_secrets/grafana_cloud/personal-projects-prod-1 returnall=true') | from_yaml }}"  # noqa: yaml
+
+    - name: Ensure Helm repositories are available
+      run_once: true
+      delegate_to: localhost
+      kubernetes.core.helm_repository:
+        name: "{{ item.name }}"
+        repo_url: "{{ item.url }}"
+        state: present
+      loop:
+        - name: grafana
+          url: https://grafana.github.io/helm-charts
+        - name: prometheus-community
+          url: https://prometheus-community.github.io/helm-charts
+      loop_control:
+        label: "{{ item.name }}"
+
+    # https://github.com/grafana/helm-charts/tree/promtail-6.6.0/charts/promtail
+    - name: Ensure Promtail is deployed
+      run_once: true
+      delegate_to: localhost
+      kubernetes.core.helm:
+        update_repo_cache: true
+        name: promtail
+        namespace: promtail
+        create_namespace: true
+        chart_ref: grafana/promtail
+        chart_version: 6.6.0
+        release_values:
+          config:
+            clients:
+              - url: https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push
+                basic_auth:
+                  username: "{{ grafana_agent_secrets.loki_username }}"
+                  password: "{{ grafana_agent_secrets.token }}"
+                external_labels:
+                  cluster: personal-projects-prod-1
+        state: present
+
+    # https://github.com/prometheus-community/helm-charts/tree/prometheus-15.17.0/charts/prometheus
+    - name: Ensure Prometheus is deployed
+      run_once: true
+      delegate_to: localhost
+      kubernetes.core.helm:
+        update_repo_cache: true
+        name: prometheus
+        namespace: prometheus
+        create_namespace: true
+        chart_ref: prometheus-community/prometheus
+        chart_version: 15.17.0
+        release_values:
+          alertmanager:
+            enabled: false
+          nodeExporter:
+            enabled: false
+          pushgateway:
+            enabled: false
+          server:
+            persistentVolume:
+              enabled: false
+            remoteWrite:
+              - url: https://prometheus-prod-01-eu-west-0.grafana.net/api/prom/push
+                basic_auth:
+                  username: "{{ grafana_agent_secrets.prometheus_username }}"
+                  password: "{{ grafana_agent_secrets.token }}"
+                write_relabel_configs:
+                  - source_labels:
+                      - __name__
+                    regex: "up|traefik_.*|spaceapi_.*"
+                    action: keep
+                  - target_label: cluster
+                    replacement: personal-projects-prod-1
+        state: present

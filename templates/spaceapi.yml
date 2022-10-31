@@ -19,6 +19,9 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: makerspace-spaceapi
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
     spec:
       containers:
         - name: makerspace-spaceapi
