@@ -69,6 +69,8 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: matrix-dapnet-bot
+      annotations:
+        prometheus.io/scrape: "true"
     spec:
       volumes:
         - name: dapnet-config
@@ -76,8 +78,19 @@ spec:
             name: dapnet-config
       containers:
         - name: bot
-          image: ghcr.io/dannixon/matrix-dapnet-bot:v0.3.0
-          imagePullPolicy: Always
+          image: ghcr.io/dannixon/matrix-dapnet-bot:fee1215ea1c10872fce2f2ce41d6c05f65d35b30
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: metrics
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: metrics
+            initialDelaySeconds: 3
+            periodSeconds: 3
           env:
             - name: RUST_LOG
               value: debug
@@ -98,3 +111,7 @@ spec:
           volumeMounts:
             - name: dapnet-config
               mountPath: /config
+          ports:
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP

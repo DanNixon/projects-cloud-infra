@@ -73,7 +73,7 @@
                 write_relabel_configs:
                   - source_labels:
                       - __name__
-                    regex: "up|traefik_.*|spaceapi_.*"
+                    regex: "up|traefik_.*|spaceapi_.*|matrixdapnetbot_.*"
                     action: keep
                   - target_label: cluster
                     replacement: personal-projects-prod-1
