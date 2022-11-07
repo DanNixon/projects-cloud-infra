@@ -31,10 +31,24 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: matrix-remote-closedown
+      annotations:
+        prometheus.io/scrape: "true"
     spec:
       containers:
         - name: mqtt-actor
-          image: ghcr.io/dannixon/matrix-remote-closedown:v0.3.1
+          image: ghcr.io/dannixon/matrix-remote-closedown:dfd5797d32197a5474ad4b65a506bc5f8b86d237
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: metrics
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: metrics
+            initialDelaySeconds: 3
+            periodSeconds: 3
           env:
             - name: RUST_LOG
               value: debug
@@ -52,3 +66,7 @@ spec:
             - "--operator=@dannixon:matrix.org"
             - "--operator=@alistair_uk:matrix.org"
             - "--operator=@malcolm:synapse.windmill.onl"
+          ports:
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
