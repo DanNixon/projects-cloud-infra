@@ -12,6 +12,7 @@
         definition: "{{ lookup('template', '%s' % item) | from_yaml_all | list }}"
         state: present
       loop:
+        - influxdb.yml
         - matrix-dapnet-bot.yml
         - mqtt.yml
         - spaceapi.yml

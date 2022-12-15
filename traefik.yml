@@ -41,8 +41,8 @@
               expose: true
               exposedPort: 1883
           certResolvers:
-            makerspace-letsencrypt:
-              email: dan+makerspace@dan-nixon.com
+            letsencrypt:
+              email: dan+letsencrypt@dan-nixon.com
               storage: /tmp/acme.json
               httpChallenge:
                 entryPoint: web

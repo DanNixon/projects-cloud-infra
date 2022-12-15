@@ -113,4 +113,4 @@ spec:
           name: makerspace-spaceapi
           port: 8080
   tls:
-    certResolver: makerspace-letsencrypt
+    certResolver: letsencrypt
