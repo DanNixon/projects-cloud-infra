@@ -1,0 +1,18 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana-https
+  namespace: grafana
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`grafana.dan-nixon.com`)
+      services:
+        - kind: Service
+          name: grafana
+          port: 80
+  tls:
+    certResolver: letsencrypt
