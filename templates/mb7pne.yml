@@ -15,6 +15,20 @@ data:
   MATRIX_PASSWORD: "{{ lookup('community.general.passwordstore', 'Passwords/Personal/matrix.org/izayoi_sakuya/Password') | b64encode }}"
 
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: matrix-remote-closedown-data
+  namespace: mb7pne
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,7 +50,7 @@ spec:
     spec:
       containers:
         - name: matrix-remote-closedown
-          image: ghcr.io/dannixon/matrix-remote-closedown:dfd5797d32197a5474ad4b65a506bc5f8b86d237
+          image: ghcr.io/dannixon/matrix-remote-closedown:f7199585332a54dd56e4e9a5aa48d871c5270e33
           livenessProbe:
             httpGet:
               path: /alive
@@ -51,7 +65,7 @@ spec:
             periodSeconds: 3
           env:
             - name: RUST_LOG
-              value: debug
+              value: info
           envFrom:
             - secretRef:
                 name: matrix-remote-closedown-secrets
@@ -70,6 +84,13 @@ spec:
             - name: metrics
               containerPort: 9090
               protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: matrix-remote-closedown-data
 
 ---
 apiVersion: batch/v1
