@@ -5,6 +5,15 @@ metadata:
   name: spaceapi
 
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: spaceapi-mqtt-password
+  namespace: spaceapi
+stringData:
+  MQTT_PASSWORD: "{{ mqtt_secrets.mqtt_passwords.spaceapi }}"
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -25,7 +34,7 @@ spec:
     spec:
       containers:
         - name: makerspace-spaceapi
-          image: ghcr.io/dannixon/makerspace-spaceapi:094cb1ccbf75da3411e50a435df6eb067fb69452
+          image: ghcr.io/dannixon/makerspace-spaceapi:61398a059526a7409e465bdc7419bd2ccc91c817
           livenessProbe:
             httpGet:
               path: /alive
@@ -40,7 +49,10 @@ spec:
             periodSeconds: 3
           env:
             - name: RUST_LOG
-              value: debug
+              value: info
+          envFrom:
+            - secretRef:
+                name: spaceapi-mqtt-password
           ports:
             - name: http
               containerPort: 8080
