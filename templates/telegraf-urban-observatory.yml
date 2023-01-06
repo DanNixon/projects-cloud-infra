@@ -1,46 +1,45 @@
 ---
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: telegraf-urban-observatory
+
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: telegraf-config
-  namespace: influxdb
+  namespace: telegraf-urban-observatory
 stringData:
   telegraf.conf: |
     [agent]
+    debug = true
     omit_hostname = true
 
     [[outputs.influxdb_v2]]
     urls = ["http://influxdb.influxdb.svc.cluster.local:8086"]
     token = "{{ lookup('community.general.passwordstore', 'ansible_secrets/influx_makerspace_sensors_telegraf_token') }}"
     organization = "Maker Space"
-    bucket = "sensors"
+    bucket = "urban-observatory"
 
-    [[inputs.mqtt_consumer]]
-    servers = ["tcp://mqtt.mqtt.svc.cluster.local:1883"]
-    connection_timeout = "10s"
-    username = "telegraf"
-    password = "{{ mqtt_secrets.mqtt_passwords.telegraf }}"
-
-    topics = [
-      "makerspace/sensors/+/temperature",
-      "makerspace/sensors/+/humidity",
-    ]
-    qos = 0
-
-    data_format = "value"
-    data_type = "float"
-
-    [[inputs.mqtt_consumer.topic_parsing]]
-    topic = "makerspace/sensors/+/+"
-    measurement = "_/_/_/measurement"
-    tags = "_/_/sensor/_"
+    [[inputs.http]]
+    interval = "1h"
+    urls = ["http://uoweb3.ncl.ac.uk/api/v1.1/sensors/PER_AIRMON_MESH1965150/data/csv/?last_n_days=1"]
+    timeout = "10s"
+    data_format = "csv"
+    csv_header_row_count = 1
+    csv_timestamp_column = "Timestamp"
+    csv_timestamp_format = "2006-01-02 15:04:05"
+    csv_measurement_column = "Variable"
+    csv_tag_columns = ["Sensor Name"]
+    namepass = ["Temperature", "Humidity", "Pressure"]
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: telegraf
-  namespace: influxdb
+  namespace: telegraf-urban-observatory
   labels:
     app.kubernetes.io/name: telegraf
 spec:

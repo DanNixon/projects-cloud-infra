@@ -44,7 +44,8 @@
       loop:
         - mqtt.yml
         - influxdb.yml
-        - telegraf.yml
+        - telegraf-makerspace-sensors.yml
+        - telegraf-urban-observatory.yml
         - grafana.yml
         - matrix-dapnet-bot.yml
         - spaceapi.yml
