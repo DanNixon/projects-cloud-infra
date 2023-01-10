@@ -28,7 +28,7 @@
         chart_version: 6.48.0
         release_values:
           adminUser: dan
-          adminPassword: "{{ lookup('community.general.passwordstore', 'Passwords/Personal/cloud_grafana') }}"
+          adminPassword: "{{ lookup('community.general.passwordstore', 'Passwords/Personal/grafana.dan-nixon.com/password') }}"
           persistence:
             enabled: true
             size: 2Gi
