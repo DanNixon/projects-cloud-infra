@@ -35,6 +35,8 @@
           grafana.ini:
             feature_toggles:
               publicDashboards: true
+            security:
+              allow_embedding: true
         state: present
 
     - name: Ensure deployment
