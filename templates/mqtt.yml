@@ -6,6 +6,15 @@ metadata:
 
 ---
 apiVersion: v1
+kind: Secret
+metadata:
+  name: message-debug-secret
+  namespace: mqtt
+data:
+  MQTT_PASSWORD: "{{ mqtt_secrets.mqtt_passwords.debug | b64encode }}"
+
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mosquitto-config
@@ -56,6 +65,22 @@ spec:
           volumeMounts:
             - mountPath: "/mosquitto/config"
               name: mosquitto-config
+        - name: message-debug
+          image: docker.io/library/eclipse-mosquitto:2.0.15
+          envFrom:
+            - secretRef:
+                name: message-debug-secret
+          command:
+            - /usr/bin/mosquitto_sub
+            - -u
+            - debug
+            - -P
+            - "$(MQTT_PASSWORD)"
+            - -h
+            - 127.0.0.1
+            - -t
+            - "#"
+            - -v
 
 ---
 apiVersion: v1
