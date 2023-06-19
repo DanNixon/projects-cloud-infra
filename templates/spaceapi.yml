@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
         - name: makerspace-spaceapi
-          image: ghcr.io/dannixon/makerspace-spaceapi:ebc4b934b8279977bdcbf4d8344cc273a9278f77
+          image: ghcr.io/dannixon/makerspace-spaceapi:b1e72ab6cf564d40275a33bbf860fcdda9d00e6e
           livenessProbe:
             httpGet:
               path: /alive
