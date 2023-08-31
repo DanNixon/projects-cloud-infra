@@ -1,4 +1,4 @@
-# Projects Cloud Infrastructure [![Code Quality](https://github.com/DanNixon/projects-cloud-infra/actions/workflows/code_quality.yml/badge.svg)](https://github.com/DanNixon/projects-cloud-infra/actions/workflows/code_quality.yml)
+# Projects Cloud Infrastructure
 
 Cloud infrastructure for personal projects.
 
