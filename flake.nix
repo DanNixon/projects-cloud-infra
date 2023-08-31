@@ -21,6 +21,7 @@
       default = pkgs.mkShell {
         packages = (with pkgs; [
           ansible
+          influxdb2-cli
           kubernetes-helm
           (python3.withPackages (p: [ p.kubernetes ]))
         ])
