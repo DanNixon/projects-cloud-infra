@@ -1,0 +1,17 @@
+# https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+#
+adminUser: dan
+adminPassword: "ref+sops://src/secrets.yml#/grafana/password"
+
+persistence:
+  enabled: true
+  size: 2Gi
+
+grafana.ini:
+  feature_toggles:
+    publicDashboards: true
+  security:
+    allow_embedding: true
+
+testFramework:
+  enabled: false
