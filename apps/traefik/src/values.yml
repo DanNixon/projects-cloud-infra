@@ -1,0 +1,29 @@
+logs:
+  general:
+    level: INFO
+ports:
+  traefik:
+    port: 9000
+    protocol: TCP
+    expose: false
+  web:
+    port: 8000
+    protocol: TCP
+    expose: true
+    exposedPort: 80
+  websecure:
+    port: 8443
+    protocol: TCP
+    expose: true
+    exposedPort: 443
+  mqtt:
+    port: 1883
+    protocol: TCP
+    expose: true
+    exposedPort: 1883
+certResolvers:
+  letsencrypt:
+    email: dan+letsencrypt@dan-nixon.com
+    storage: /tmp/acme.json
+    httpChallenge:
+      entryPoint: web
