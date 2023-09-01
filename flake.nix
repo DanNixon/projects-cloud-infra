@@ -20,12 +20,20 @@
     devShells = forAllSystems ({ pkgs }: {
       default = pkgs.mkShell {
         packages = (with pkgs; [
-          ansible
-          influxdb2-cli
+          kapp
+
           kubernetes-helm
-          (python3.withPackages (p: [ p.kubernetes ]))
+
+          sops
+          vals
+
+          influxdb2-cli
         ])
         ++ pkgs.lib.optionals pkgs.stdenv.isDarwin (with pkgs; [ libiconv ]);
+
+        shellHook = ''
+          export SOPS_PGP_FP="84E956241243C35EA286B410EA06B7ABA96D6BB8"
+        '';
       };
     });
   };
