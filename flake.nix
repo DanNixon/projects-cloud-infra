@@ -33,6 +33,7 @@
 
         shellHook = ''
           export SOPS_PGP_FP="84E956241243C35EA286B410EA06B7ABA96D6BB8"
+          export KAPP_NAMESPACE="kapp"
         '';
       };
     });
