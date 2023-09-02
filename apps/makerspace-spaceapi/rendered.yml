@@ -1,0 +1,130 @@
+#
+# This is a generated file!
+#
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: passwords
+  namespace: makerspace-spaceapi
+stringData:
+  MQTT_PASSWORD: "ref+sops://src/secrets.yml#/mqtt/password"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: makerspace-spaceapi
+  namespace: makerspace-spaceapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: makerspace-spaceapi
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: makerspace-spaceapi
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+    spec:
+      containers:
+        - name: makerspace-spaceapi
+          image: ghcr.io/dannixon/makerspace-spaceapi:b1e72ab6cf564d40275a33bbf860fcdda9d00e6e
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: metrics
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: metrics
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          env:
+            - name: RUST_LOG
+              value: info
+          envFrom:
+            - secretRef:
+                name: passwords
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: http
+  namespace: makerspace-spaceapi
+spec:
+  selector:
+    app.kubernetes.io/name: makerspace-spaceapi
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: http
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: cors-header
+  namespace: makerspace-spaceapi
+spec:
+  headers:
+    customResponseHeaders:
+      Access-Control-Allow-Origin: "*"
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: http
+  namespace: makerspace-spaceapi
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`spaceapi.makerspace.org.uk`)
+      middlewares:
+        - name: cors-header
+      services:
+        - Kind: Service
+          name: http
+          port: 8080
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: https
+  namespace: makerspace-spaceapi
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`spaceapi.makerspace.org.uk`)
+      middlewares:
+        - name: cors-header
+      services:
+        - Kind: Service
+          name: http
+          port: 8080
+  tls:
+    certResolver: letsencrypt
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: makerspace-spaceapi
