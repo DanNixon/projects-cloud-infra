@@ -1,8 +1,6 @@
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: mqtt
+#
+# This is a generated file!
+#
 
 ---
 apiVersion: v1
@@ -10,16 +8,16 @@ kind: Secret
 metadata:
   name: message-debug-secret
   namespace: mqtt
-data:
-  MQTT_PASSWORD: "{{ mqtt_secrets.mqtt_passwords.debug | b64encode }}"
+stringData:
+  MQTT_PASSWORD: "ref+sops://src/secrets.yml#/passwords/debug"
 
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   name: mosquitto-config
   namespace: mqtt
-data:
+stringData:
   mosquitto.conf: |
     per_listener_settings false
 
@@ -34,9 +32,7 @@ data:
     listener 1883
     protocol mqtt
 
-  passwd: |
-    {{ mqtt_secrets.mosquitto_passwd | indent }}
-
+  passwd: "ref+sops://src/secrets.yml#/passwd"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -57,8 +53,8 @@ spec:
     spec:
       volumes:
         - name: mosquitto-config
-          configMap:
-            name: mosquitto-config
+          secret:
+            secretName: mosquitto-config
       containers:
         - name: mosquitto
           image: docker.io/library/eclipse-mosquitto:2.0.15
@@ -95,7 +91,6 @@ spec:
     - name: mqtt
       protocol: TCP
       port: 1883
-
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRouteTCP
@@ -112,3 +107,8 @@ spec:
         - Kind: Service
           name: mqtt
           port: 1883
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mqtt
