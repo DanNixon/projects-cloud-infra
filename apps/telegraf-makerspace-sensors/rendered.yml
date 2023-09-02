@@ -1,8 +1,6 @@
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: telegraf-makerspace-sensors
+#
+# This is a generated file!
+#
 
 ---
 apiVersion: v1
@@ -18,7 +16,7 @@ stringData:
 
     [[outputs.influxdb_v2]]
     urls = ["http://influxdb.influxdb.svc.cluster.local:8086"]
-    token = "{{ lookup('community.general.passwordstore', 'ansible_secrets/influx_makerspace_sensors_telegraf_token') }}"
+    token = "ref+sops://src/secrets.yml#/influxdb/token"
     organization = "Maker Space"
     bucket = "sensors"
 
@@ -26,7 +24,7 @@ stringData:
     servers = ["tcp://mqtt.mqtt.svc.cluster.local:1883"]
     connection_timeout = "10s"
     username = "telegraf"
-    password = "{{ mqtt_secrets.mqtt_passwords.telegraf }}"
+    password = "ref+sops://src/secrets.yml#/mqtt/password"
 
     topics = [
       "makerspace/sensors/+/temperature",
@@ -41,7 +39,6 @@ stringData:
     topic = "makerspace/sensors/+/+"
     measurement = "_/_/_/measurement"
     tags = "_/_/sensor/_"
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -69,3 +66,8 @@ spec:
         - name: config
           secret:
             secretName: telegraf-config
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: telegraf-makerspace-sensors
