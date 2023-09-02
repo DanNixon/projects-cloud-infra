@@ -1,0 +1,18 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: https
+  namespace: influxdb
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`influxdb.dan-nixon.com`)
+      services:
+        - Kind: Service
+          name: influxdb
+          port: 8086
+  tls:
+    certResolver: letsencrypt
