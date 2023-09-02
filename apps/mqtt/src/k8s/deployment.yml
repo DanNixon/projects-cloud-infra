@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+  namespace: mqtt
+  labels:
+    app.kubernetes.io/name: mosquitto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mosquitto
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mosquitto
+    spec:
+      volumes:
+        - name: mosquitto-config
+          secret:
+            secretName: mosquitto-config
+      containers:
+        - name: mosquitto
+          image: docker.io/library/eclipse-mosquitto:2.0.15
+          volumeMounts:
+            - mountPath: "/mosquitto/config"
+              name: mosquitto-config
+        - name: message-debug
+          image: docker.io/library/eclipse-mosquitto:2.0.15
+          envFrom:
+            - secretRef:
+                name: message-debug-secret
+          command:
+            - /usr/bin/mosquitto_sub
+            - -u
+            - debug
+            - -P
+            - "$(MQTT_PASSWORD)"
+            - -h
+            - 127.0.0.1
+            - -t
+            - "#"
+            - -v
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt
+  namespace: mqtt
+spec:
+  selector:
+    app.kubernetes.io/name: mosquitto
+  ports:
+    - name: mqtt
+      protocol: TCP
+      port: 1883
