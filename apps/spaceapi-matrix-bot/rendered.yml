@@ -1,8 +1,16 @@
+#
+# This is a generated file!
+#
+
 ---
 apiVersion: v1
-kind: Namespace
+kind: Secret
 metadata:
-  name: spaceapi-matrix-bot
+  name: passwords
+  namespace: spaceapi-matrix-bot
+stringData:
+  MQTT_PASSWORD: "ref+sops://src/secrets.yml#/mqtt/password"
+  MATRIX_PASSWORD: "ref+sops://src/secrets.yml#/matrix/password"
 
 ---
 apiVersion: v1
@@ -17,16 +25,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: passwords
-  namespace: spaceapi-matrix-bot
-stringData:
-  MQTT_PASSWORD: "{{ mqtt_secrets.mqtt_passwords.spaceapi }}"
-  MATRIX_PASSWORD: "{{ lookup('community.general.passwordstore', 'Passwords/Personal/matrix.org/makerspace/password') }}"
 
 ---
 apiVersion: apps/v1
@@ -73,3 +71,8 @@ spec:
         - name: matrix-data
           persistentVolumeClaim:
             claimName: matrix
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spaceapi-matrix-bot
