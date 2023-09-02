@@ -1,18 +1,6 @@
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: mb7pne
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: matrix-remote-closedown-secrets
-  namespace: mb7pne
-data:
-  MQTT_PASSWORD: "{{ mqtt_secrets.mqtt_passwords.matrix_remote_closedown | b64encode }}"
-  MATRIX_PASSWORD: "{{ lookup('community.general.passwordstore', 'Passwords/Personal/matrix.org/izayoi_sakuya/Password') | b64encode }}"
+#
+# This is a generated file!
+#
 
 ---
 apiVersion: v1
@@ -68,7 +56,7 @@ spec:
               value: info
           envFrom:
             - secretRef:
-                name: matrix-remote-closedown-secrets
+                name: closedown-secrets
           args:
             - "--station-name=mb7pne"
             - "--mqtt-broker=tcp://mqtt.mqtt.svc.cluster.local:1883"
@@ -78,8 +66,6 @@ spec:
             - "--matrix-username=@izayoi_sakuya:matrix.org"
             - "--room=!LpBfhDcZLlKVvDoNKV:matrix.org"
             - "--operator=@dannixon:matrix.org"
-            - "--operator=@alistair_uk:matrix.org"
-            - "--operator=@malcolm:synapse.windmill.onl"
           ports:
             - name: metrics
               containerPort: 9090
@@ -91,7 +77,11 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: matrix-remote-closedown-data
-
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mb7pne
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -109,7 +99,7 @@ spec:
               image: docker.io/library/eclipse-mosquitto:2.0.15
               envFrom:
                 - secretRef:
-                    name: matrix-remote-closedown-secrets
+                    name: closedown-secrets
               command:
                 - /usr/bin/mosquitto_pub
                 - -u
@@ -141,7 +131,7 @@ spec:
               image: docker.io/library/eclipse-mosquitto:2.0.15
               envFrom:
                 - secretRef:
-                    name: matrix-remote-closedown-secrets
+                    name: closedown-secrets
               command:
                 - /usr/bin/mosquitto_pub
                 - -u
@@ -155,3 +145,12 @@ spec:
                 - -m
                 - '{"enable_tx_power": true}'
           restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: closedown-secrets
+  namespace: mb7pne
+stringData:
+  MQTT_PASSWORD: "ref+sops://src/secrets.yml#/mqtt/password"
+  MATRIX_PASSWORD: "ref+sops://src/secrets.yml#/matrix/password"
