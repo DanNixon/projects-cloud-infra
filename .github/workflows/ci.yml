@@ -1,0 +1,29 @@
+---
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  render-manifests:
+    name: Render Manifests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v20
+
+      - name: Render all manifests
+        run: |
+          eval "$(nix print-dev-env)"
+          ./render.sh
+
+      - name: Check committed manifests are up to date
+        run: |
+          git diff --exit-code
