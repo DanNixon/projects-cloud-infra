@@ -10,6 +10,7 @@
     traefik \
     traefik \
     --repo https://helm.traefik.io/traefik \
+    --version "24.0.0" \
     --namespace traefik \
     --values src/values.yml
 
