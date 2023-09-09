@@ -10,7 +10,7 @@
     promtail \
     promtail \
     --repo https://grafana.github.io/helm-charts \
-    --version 6.6.0 \
+    --version "6.6.0" \
     --namespace promtail \
     --values src/values.yml \
   | vals ksdecode -f -
