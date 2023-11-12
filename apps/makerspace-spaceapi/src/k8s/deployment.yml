@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: makerspace-spaceapi
-          image: ghcr.io/dannixon/makerspace-spaceapi:64b6a319cf5722200a125b8ec75e5beb9d58e702
+          image: ghcr.io/dannixon/makerspace-spaceapi:056e088ebad22cee3d81ad6c8eda08e732b5c054
           livenessProbe:
             httpGet:
               path: /alive
@@ -44,6 +44,8 @@ spec:
           env:
             - name: RUST_LOG
               value: info
+            - name: MQTT_BROKER
+              value: tcp://mqtt.mqtt.svc.cluster.local:1883
           envFrom:
             - secretRef:
                 name: passwords
