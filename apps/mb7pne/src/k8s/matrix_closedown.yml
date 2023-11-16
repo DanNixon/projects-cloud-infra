@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
         - name: matrix-remote-closedown
-          image: ghcr.io/dannixon/matrix-remote-closedown:f7199585332a54dd56e4e9a5aa48d871c5270e33
+          image: ghcr.io/dannixon/matrix-remote-closedown:6f339e2d5da815c82b9f48d1e7c5290f7016acce
           livenessProbe:
             httpGet:
               path: /alive
@@ -59,9 +59,9 @@ spec:
             - "--mqtt-username=matrix_remote_closedown"
             - "--status-topic=mb7pne/remote_closedown/status"
             - "--command-topic=mb7pne/remote_closedown/command"
+            - "--matrix-storage=/data/matrix"
             - "--matrix-username=@izayoi_sakuya:matrix.org"
             - "--room=!LpBfhDcZLlKVvDoNKV:matrix.org"
-            - "--operator=@dannixon:matrix.org"
           ports:
             - name: metrics
               containerPort: 9090
