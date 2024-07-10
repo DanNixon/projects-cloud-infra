@@ -1,9 +1,0 @@
-# https://github.com/grafana/helm-charts/tree/promtail-6.6.0/charts/promtail
-config:
-  clients:
-    - url: https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push
-      basic_auth:
-        username: "ref+sops://src/secrets.yml#/promtail/username"
-        password: "ref+sops://src/secrets.yml#/promtail/password"
-      external_labels:
-        cluster: personal-projects-2
